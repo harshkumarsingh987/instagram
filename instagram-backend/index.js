@@ -279,6 +279,9 @@ app.patch("/api/posts/like/:id", async (req, res) => {
     res.status(500).json({ message: "Error updating like", error: err.message });
   }
 });
+app.get("/", (req, res) => {
+  res.send(" Instagram Clone Backend is running");
+});
 
 
 const PORT = process.env.PORT || 5000;
