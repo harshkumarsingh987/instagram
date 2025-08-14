@@ -19,6 +19,7 @@ function ProfileUpdater({ open, onClose, userId }) {
   const [error, setError] = useState(false);
   const fileInputRef = useRef(null);
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -33,19 +34,16 @@ function ProfileUpdater({ open, onClose, userId }) {
     return;
   }
 
-  try {
-    const formData = new FormData();
-    formData.append("profilePic", imageFile);  // this key must match multer field name
+   try {
+      const formData = new FormData();
+      formData.append("profilePic", imageFile); // must match multer field name
 
-    await axios.put(
-      `http://localhost:5000/api/users/${userId.trim()}/profile`,
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data"
-        }
-      }
-    );
+        await axios.put(
+        `${API_BASE_URL}/api/users/${userId.trim()}/profile`,
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
+
     
    console.log("Profile picture uploaded successfully");
    
