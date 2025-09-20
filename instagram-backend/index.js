@@ -10,21 +10,23 @@ const fs = require("fs");
 const path = require("path");
 const postRoutes = require("./routes/post");
 const storyRoutes = require("./routes/story")
-
+const userRoutes = require("./routes/user");
 const app = express();
 app.use(cors());
 app.use(express.json());
 app.use("/uploads", express.static("uploads"));
 const uploadPath = path.join(__dirname, "uploads");
 app.use("/api/posts", postRoutes);
-app.use("/api/story",storyRoutes)
+app.use("/api/story",storyRoutes);
+app.use("/api/users", userRoutes);
 // Create uploads folder if it doesn't exist
 if (!fs.existsSync(uploadPath)) {
   fs.mkdirSync(uploadPath);
 }
 
 
-
+// ✅ Use BACKEND_URL environment variable
+const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:5000";
 
 
 // 👉 Add this line to check the MongoDB connection string
@@ -156,7 +158,8 @@ app.put("/api/users/:id/profile", profileUpload.single("profilePic"), async (req
   }
 
   // Generate profile URL correctly
-  const profileUrl = `http://localhost:5000/uploads/profiles/${req.file.filename}`;
+
+  const profileUrl = `${BACKEND_URL}/uploads/profiles/${req.file.filename}`; // ✅ corrected
 
   try {
     // Update user document
@@ -179,8 +182,35 @@ app.put("/api/users/:id/profile", profileUpload.single("profilePic"), async (req
 
 
 
+// Upload post
+app.post("/api/posts/upload", upload.single("image"), async (req, res) => {
+  const { caption, userId } = req.body;
+  if (!req.file || !userId) return res.status(400).json({ error: "Image and userId are required" });
+
+  try {
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    const imageUrl = `${BACKEND_URL}/uploads/${req.file.filename}`; // ✅ corrected
+
+    const newPost = new Post({
+      username: user.username,
+      userId,
+      caption,
+      imageUrl,
+      profileUrl: user.profileUrl,
+    });
+
+    const savedPost = await newPost.save();
+    res.status(201).json({ message: "Post uploaded", post: savedPost });
+  } catch (err) {
+    console.error("Upload failed:", err);
+    res.status(500).json({ error: "Failed to upload post" });
+  }
+});
 
 // ➤ Upload post with image
+/*
 app.post("/api/posts/upload", upload.single("image"), async (req, res) => {
   const { username, profileUrl, caption, userId } = req.body;
 
@@ -188,8 +218,9 @@ app.post("/api/posts/upload", upload.single("image"), async (req, res) => {
     return res.status(400).json({ error: "Image and userId are required" });
   }
 
-  const imageUrl = `http://localhost:5000/uploads/${req.file.filename}`;
+  //const imageUrl = `http://localhost:5000/uploads/${req.file.filename}`;
 
+  const profileUrl = `${BACKEND_URL}/uploads/profiles/${req.file.filename}`; // ✅ corrected
   try {
     const newPost = new Post({
       username,
@@ -205,7 +236,7 @@ app.post("/api/posts/upload", upload.single("image"), async (req, res) => {
     res.status(500).json({ error: "Failed to upload post" });
   }
 });
-
+*/
  
 // Get all posts
 app.get("/api/posts", async (req, res) => {
