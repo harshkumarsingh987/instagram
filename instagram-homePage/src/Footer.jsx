@@ -23,8 +23,8 @@ import { pink } from "@mui/material/colors";
 import { useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { auth } from "./firebase";
-import PostUploader from "./PostUploader"; // Ensure this exists
-import ProfileUpdater from "./ProfileUpdater"; // Adjust the path as needed
+import PostUploader from "./PostUploader.jsx"; // Ensure this exists
+import ProfileUpdater from "./ProfileUpdater.jsx"; // Adjust the path as needed
 
 function Footer({ user }) {
   const [value, setValue] = useState(0);
